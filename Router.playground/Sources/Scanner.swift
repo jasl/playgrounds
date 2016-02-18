@@ -21,25 +21,23 @@ public struct Token {
 }
 
 public struct Scanner {
-    let stopWordsSet: Set<Character> = ["(", ")", "/"]
+    private let stopWordsSet: Set<Character> = ["(", ")", "/"]
 
-    let expression: String
+    public let expression: String
 
-    var position: String.Index
-    private let endPosition: String.Index
-
-    var unScannedFragment: String {
-        return self.expression.substringFromIndex(self.position)
-    }
+    private(set) var position: String.Index
 
     public init(expression: String) {
         self.expression = expression
         self.position = self.expression.startIndex
-        self.endPosition = self.expression.endIndex
     }
 
     public var isEOF: Bool {
-        return self.position == self.endPosition
+        return self.position == self.expression.endIndex
+    }
+
+    private var unScannedFragment: String {
+        return self.expression.substringFromIndex(self.position)
     }
 
     public mutating func nextToken() -> Token? {
@@ -47,13 +45,7 @@ public struct Scanner {
             return nil
         }
 
-        return scan()
-    }
-
-    private mutating func scan() -> Token {
-        guard let firstChar = self.unScannedFragment.characters.first else {
-            fatalError("expression is exhausted")
-        }
+        let firstChar = self.unScannedFragment.characters.first!
 
         self.position = self.position.advancedBy(1)
 
