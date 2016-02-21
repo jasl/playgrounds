@@ -16,7 +16,7 @@ public func playScannerTest1() {
         while let token = scanner.nextToken() {
             tokens.append(token)
 
-            str += " [\(token.type): \(token.value)]"
+            str += " \(token.debugDescription)"
         }
 
         print(str)
@@ -43,7 +43,7 @@ public func playScannerTest2() {
 
         var reGeneratedExpr = ""
         for token in tokens {
-            reGeneratedExpr += token.value
+            reGeneratedExpr += token.description
         }
 
 

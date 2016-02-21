@@ -1,22 +1,77 @@
 import Foundation
 
-public enum TokenType {
+public enum Token {
     case Slash
-    case Literal
-    case Symbol
+    case Dot
+
+    case Literal(String)
+    case Symbol(String)
+    case Star(String)
+
     case LParen
     case RParen
-    case Star
-    case Dot
 }
 
-public struct Token {
-    public let type: TokenType
-    public let value: String
+extension Token: CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String {
+        switch self {
+        case .Slash:
+            return "/"
+        case .Dot:
+            return "."
+        case .LParen:
+            return "("
+        case .RParen:
+            return ")"
+        case .Literal(let value):
+            return value
+        case .Symbol(let value):
+            return ":\(value)"
+        case .Star(let value):
+            return "*\(value)"
+        }
+    }
 
-    public init(type: TokenType, value: String) {
-        self.type = type
-        self.value = value
+    public var debugDescription: String {
+        switch self {
+        case .Slash:
+            return "[Slash]"
+        case .Dot:
+            return "[Dot]"
+        case .LParen:
+            return "[LParen]"
+        case .RParen:
+            return "[RParen]"
+        case .Literal(let value):
+            return "[Literal \"\(value)\"]"
+        case .Symbol(let value):
+            return "[Symbol \"\(value)\"]"
+        case .Star(let value):
+            return "[Star \"\(value)\"]"
+        }
+    }
+}
+
+extension Token: Equatable { }
+
+public func ==(lhs: Token, rhs: Token) -> Bool {
+    switch (lhs, rhs) {
+    case (.Slash, .Slash):
+        return true
+    case (.Dot, .Dot):
+        return true
+    case (let .Literal(lval), let .Literal(rval)):
+        return lval == rval
+    case (let .Symbol(lval), let .Symbol(rval)):
+        return lval == rval
+    case (let .Star(lval), let .Star(rval)):
+        return lval == rval
+    case (.LParen, .LParen):
+        return true
+    case (.RParen, .RParen):
+        return true
+    default:
+        return false
     }
 }
 
@@ -51,18 +106,18 @@ public struct Scanner {
 
         switch firstChar {
         case "/":
-            return Token(type: .Slash, value: "/")
+            return .Slash
         case ".":
-            return Token(type: .Dot, value: ".")
+            return .Dot
         case "(":
-            return Token(type: .LParen, value: "(")
+            return .LParen
         case ")":
-            return Token(type: .RParen, value: ")")
+            return .RParen
         default:
             break
         }
 
-        var fragment = "\(firstChar)"
+        var fragment = ""
         var stepPosition = 0
         for char in self.unScannedFragment.characters {
             if stopWordsSet.contains(char) {
@@ -77,11 +132,22 @@ public struct Scanner {
 
         switch firstChar {
         case ":":
-            return Token(type: .Symbol, value: fragment)
+            return .Symbol(fragment)
         case "*":
-            return Token(type: .Star, value: fragment)
+            return .Star(fragment)
         default:
-            return Token(type: .Literal, value: fragment)
+            return .Literal("\(firstChar)\(fragment)")
         }
+    }
+
+    public static func tokenize(expression: String) -> [Token] {
+        var scanner = Scanner(expression: expression)
+
+        var tokens: [Token] = []
+        while let token = scanner.nextToken() {
+            tokens.append(token)
+        }
+
+        return tokens
     }
 }
