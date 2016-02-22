@@ -24,7 +24,14 @@ let handler: RouteVertex.HandlerType = { _ in
 }
 
 var route = parse(tokens1, terminalHandler: handler)
-route = parse(tokens2, context: route, terminalHandler: handler)
-route = parse(tokens3, context: route, terminalHandler: handler)
+//route = parse(tokens2, context: route, terminalHandler: handler)
+//route = parse(tokens3, context: route, terminalHandler: handler)
 
 print(route.debugDescription)
+
+let uri = "/articles/page/2.json"
+
+let matchedRoute = match(uri, route: route)
+
+print(matchedRoute)
+
